@@ -9,7 +9,8 @@
     "start": "next start",
     "lint": "next lint",
     "deploy": "./deploy.sh",
-    "quick-deploy": "./quick-deploy.sh"
+    "quick-deploy": "./quick-deploy.sh",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@emotion/cache": "^11.11.0",
