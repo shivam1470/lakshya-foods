@@ -2,7 +2,7 @@
   "version": 2,
   "regions": ["bom1"],
   "functions": {
-    "pages/api/**/*.ts": {
+    "src/pages/api/admin/**": {
       "maxDuration": 30
     }
   }
