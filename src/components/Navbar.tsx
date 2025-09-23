@@ -117,6 +117,12 @@ export const Navbar: React.FC = () => {
                   <AccountCircleIcon sx={{ mr: 2 }} />
                   Profile
                 </MenuItem>
+                {session.user?.role === 'admin' && (
+                  <MenuItem onClick={() => router.push('/admin')}>
+                    <AccountCircleIcon sx={{ mr: 2 }} />
+                    Admin Dashboard
+                  </MenuItem>
+                )}
                 <Divider />
                 <MenuItem onClick={handleSignOut}>
                   <LogoutIcon sx={{ mr: 2 }} />
@@ -203,6 +209,14 @@ export const Navbar: React.FC = () => {
                     <ListItemText primary="Profile" />
                   </ListItemButton>
                 </ListItem>
+                {session.user?.role === 'admin' && (
+                  <ListItem disablePadding>
+                    <ListItemButton onClick={() => { router.push('/admin'); toggleDrawer(false)(); }}>
+                      <AccountCircleIcon sx={{ mr: 2 }} />
+                      <ListItemText primary="Admin Dashboard" />
+                    </ListItemButton>
+                  </ListItem>
+                )}
                 <ListItem disablePadding>
                   <ListItemButton onClick={handleSignOut}>
                     <LogoutIcon sx={{ mr: 2 }} />

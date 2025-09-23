@@ -2,7 +2,16 @@ import { withAuth } from 'next-auth/middleware'
 
 export default withAuth(
   function middleware(req) {
-    // Add any additional middleware logic here
+    const { pathname } = req.nextUrl
+    const token = req.nextauth.token
+
+    // Admin routes protection
+    if (pathname.startsWith('/admin')) {
+      if (token?.role !== 'admin') {
+        return new Response('Forbidden', { status: 403 })
+      }
+    }
+
     return
   },
   {
@@ -15,6 +24,11 @@ export default withAuth(
           return !!token
         }
 
+        // Protect admin pages - require admin role
+        if (pathname.startsWith('/admin')) {
+          return !!token && token.role === 'admin'
+        }
+
         // Allow access to other pages
         return true
       },
@@ -25,6 +39,7 @@ export default withAuth(
 export const config = {
   matcher: [
     '/profile/:path*',
+    '/admin/:path*',
     // Add other protected routes here
   ]
 }

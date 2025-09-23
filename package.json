@@ -7,7 +7,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "deploy": "./deploy.sh",
+    "quick-deploy": "./quick-deploy.sh"
   },
   "dependencies": {
     "@emotion/cache": "^11.11.0",

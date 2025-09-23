@@ -1,42 +1,122 @@
-# Lakshya Foods Website
+# Lakshya Foods - Premium Spices Export Website
 
-A production-ready marketing site for Lakshya Foods built with:
-
-- Next.js 14 (Pages Router)
-- TypeScript
-- Tailwind CSS
-- Material UI (MUI 5) + Emotion SSR
-- Framer Motion for animations
+A modern Next.js website for Lakshya Foods, featuring comprehensive admin dashboard, user management, and order tracking system.
 
 ## 🌐 Live Demo
 **[View Live Site](https://your-deployed-url.vercel.app)** ← *Update this after deployment*
 
-## Features
-- Responsive layout with Tailwind utility classes + MUI components
-- SEO meta tags via `Layout` component
-- Hero, Products grid, About, Export, Contact pages
-- Reusable components: Navbar, Footer, Hero, ProductCard, ContactForm, Layout
-- Placeholder SVG images in `public/images`
-- MUI Theme integrated with brand colors
-- Emotion SSR for critical CSS in `_document`
-- Optimized for production deployment
+## 🚀 Features
 
-## Getting Started
+### Frontend
+- **Modern Design**: Clean, responsive design with Material-UI + Tailwind CSS
+- **Authentication**: NextAuth.js with Google OAuth and email/password
+- **User Profiles**: Complete user profile management
+- **Contact Forms**: Integrated contact and inquiry system
+- **SEO Optimized**: Meta tags and optimized performance
 
-Install dependencies (pnpm recommended):
+### Admin Dashboard 🔐
+- **Dashboard Overview**: Key metrics and business insights at `/admin`
+- **User Management**: Complete user administration with role management at `/admin/users`
+- **Order Management**: Order tracking and status management at `/admin/orders`
+- **Inquiry Management**: Customer inquiry tracking
+- **Role-based Access**: Secure admin-only access with middleware protection
 
+### Technical Stack
+- **Frontend**: Next.js 14 (Pages Router), TypeScript, Material-UI, Tailwind CSS
+- **Authentication**: NextAuth.js with JWT sessions and Google OAuth
+- **Database**: Prisma ORM with SQLite (production-ready for PostgreSQL)
+- **Styling**: Emotion SSR + Material-UI theming + Tailwind utilities
+- **Animations**: Framer Motion for enhanced UX
+- **Deployment**: Vercel-optimized with standalone output
+
+## 🛠 Development Setup
+
+### Prerequisites
+- Node.js 18+
+- pnpm (recommended) or npm
+
+### Installation
 ```bash
+# Clone the repository
+git clone https://github.com/shivam1470/lakshya-foods.git
+cd lakshya-foods
+
+# Install dependencies
 pnpm install
+
+# Set up environment variables
+cp .env.example .env.local
+# Edit .env.local with your configuration
+
+# Set up database
+npx prisma generate
+npx prisma db push
+
+# Start development server
 pnpm dev
 ```
 
-Then visit: http://localhost:3000
+Visit: http://localhost:3000
+
+### Environment Variables
+Create a `.env.local` file with:
+```env
+# Database
+DATABASE_URL="file:./dev.db"
+
+# NextAuth
+NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_SECRET="your-secret-key"
+
+# Google OAuth (optional)
+GOOGLE_CLIENT_ID="your-google-client-id"
+GOOGLE_CLIENT_SECRET="your-google-client-secret"
+```
 
 ## Scripts
 - `pnpm dev` – start dev server
 - `pnpm build` – production build
 - `pnpm start` – run production server
 - `pnpm lint` – lint codebase
+- `pnpm deploy` – full deployment script
+- `pnpm quick-deploy` – quick deployment script
+
+## 📦 Deployment
+
+### Quick Deployment Scripts
+```bash
+# Using the comprehensive deployment script
+./deploy.sh "Your commit message"
+
+# Or using npm script
+npm run deploy
+
+# Quick deploy (shorter script)
+./quick-deploy.sh "Quick update"
+```
+
+### Manual Deployment Steps
+
+1. **Build and Test**:
+   ```bash
+   pnpm build
+   ```
+
+2. **Commit and Push to GitHub**:
+   ```bash
+   git add .
+   git commit -m "feat: your changes"
+   git push origin main
+   ```
+
+3. **Deploy to Vercel**:
+   ```bash
+   # Install Vercel CLI (if not installed)
+   npm i -g vercel
+   
+   # Deploy
+   vercel --prod
+   ```
 
 ## 🚀 Deployment
 
