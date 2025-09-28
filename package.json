@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "next dev",
-  "build": "bash -c 'if [[ \"$DATABASE_URL\" == postgresql* || \"$DATABASE_URL\" == postgres* ]]; then echo \"Running prisma migrate deploy...\"; prisma migrate deploy; else echo \"Skipping prisma migrate deploy (DATABASE_URL not postgres)\"; fi && next build'",
+  "build": "bash scripts/with-migrate.sh next build",
     "start": "next start",
     "lint": "next lint",
     "deploy": "./deploy.sh",
