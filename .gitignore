@@ -26,8 +26,8 @@ dev.db
 *.db
 *.sqlite
 
-# Prisma
-/prisma/migrations/
+# Prisma (commit migrations so schema is versioned)
+# (Removed ignore for /prisma/migrations/)
 
 # Vercel
 .vercel

@@ -5,12 +5,15 @@
   "license": "MIT",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+  "build": "bash -c 'if [[ \"$DATABASE_URL\" == postgresql* || \"$DATABASE_URL\" == postgres* ]]; then echo \"Running prisma migrate deploy...\"; prisma migrate deploy; else echo \"Skipping prisma migrate deploy (DATABASE_URL not postgres)\"; fi && next build'",
     "start": "next start",
     "lint": "next lint",
     "deploy": "./deploy.sh",
     "quick-deploy": "./quick-deploy.sh",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "seed": "ts-node --transpile-only prisma/seed.ts"
+  ,"check-env": "node scripts/check-env.cjs"
+  ,"check-db": "node scripts/check-db.cjs"
   },
   "dependencies": {
     "@emotion/cache": "^11.11.0",
@@ -28,7 +31,8 @@
     "next-auth": "^4.24.11",
     "prisma": "^6.16.2",
     "react": "18.2.0",
-    "react-dom": "18.2.0"
+    "react-dom": "18.2.0",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@types/node": "20.11.0",
@@ -39,6 +43,7 @@
     "eslint-config-next": "14.1.0",
     "postcss": "^8.4.32",
     "tailwindcss": "^3.4.1",
+    "ts-node": "^10.9.2",
     "typescript": "5.3.3"
   }
 }

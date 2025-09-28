@@ -2,50 +2,66 @@ import { prisma } from '@/lib/prisma'
 import { withAdminAuth, AdminRequest } from '@/lib/adminAuth'
 import { NextApiResponse } from 'next'
 
+interface QueryParams {
+  page?: string
+  limit?: string
+  status?: string
+  paymentStatus?: string
+  search?: string
+}
+
 async function handler(req: AdminRequest, res: NextApiResponse) {
   if (req.method === 'GET') {
     try {
-      // For now, return mock data until the Order model is fully available
-      const mockOrders = [
-        {
-          id: '1',
-          orderNumber: 'ORD-001',
-          status: 'pending',
-          totalAmount: 5000,
-          currency: 'INR',
-          paymentStatus: 'pending',
-          createdAt: new Date(),
-          user: {
-            id: '1',
-            name: 'John Doe',
-            email: 'john@example.com',
-            company: 'ABC Spices Ltd'
-          },
-          items: [
-            {
-              id: '1',
-              quantity: 10,
-              unitPrice: 500,
-              totalPrice: 5000,
-              product: {
-                id: '1',
-                name: 'Turmeric Powder',
-                category: 'Spices'
+      const { page = '1', limit = '10', status, paymentStatus, search } = req.query as QueryParams
+      const pageNum = Math.max(parseInt(page) || 1, 1)
+      const take = Math.min(Math.max(parseInt(limit) || 10, 1), 100)
+      const skip = (pageNum - 1) * take
+
+      const where: any = {}
+      if (status) where.status = status
+      if (paymentStatus) where.paymentStatus = paymentStatus
+      if (search) {
+        where.OR = [
+          { orderNumber: { contains: search, mode: 'insensitive' } },
+          { user: { email: { contains: search, mode: 'insensitive' } } },
+          { user: { name: { contains: search, mode: 'insensitive' } } },
+        ]
+      }
+
+      const [orders, total] = await Promise.all([
+        prisma.order.findMany({
+          where,
+          orderBy: { createdAt: 'desc' },
+          skip,
+            take,
+          include: {
+            user: { select: { id: true, name: true, email: true, company: true } },
+            items: {
+              select: {
+                id: true,
+                quantity: true,
+                unitPrice: true,
+                totalPrice: true,
+                product: { select: { id: true, name: true, category: true } }
               }
             }
-          ]
-        }
-      ]
+          }
+        }),
+        prisma.order.count({ where })
+      ])
+
+      const totalPages = Math.ceil(total / take) || 1
 
       res.status(200).json({
-        orders: mockOrders,
+        orders,
         pagination: {
-          page: 1,
-          limit: 10,
-          total: 1,
-          totalPages: 1,
-          hasNext: false,
-          hasPrev: false
+          page: pageNum,
+          limit: take,
+          total,
+          totalPages,
+          hasNext: pageNum < totalPages,
+          hasPrev: pageNum > 1
         }
       })
     } catch (error) {
@@ -54,16 +70,29 @@ async function handler(req: AdminRequest, res: NextApiResponse) {
     }
   } else if (req.method === 'PUT') {
     try {
-      const { orderId, action, data } = req.body
-
+      const { orderId, action, data } = req.body as { orderId?: string; action?: string; data?: any }
       if (!orderId || !action) {
         return res.status(400).json({ message: 'Order ID and action are required' })
       }
 
-      // For now, just return success response
-      res.status(200).json({
-        message: 'Order updated successfully (mock response)'
-      })
+      let updated
+      switch (action) {
+        case 'updateStatus':
+          if (!data?.status) return res.status(400).json({ message: 'Status required' })
+          updated = await prisma.order.update({ where: { id: orderId }, data: { status: data.status } })
+          break
+        case 'updatePayment':
+          if (!data?.paymentStatus) return res.status(400).json({ message: 'Payment status required' })
+          updated = await prisma.order.update({ where: { id: orderId }, data: { paymentStatus: data.paymentStatus } })
+          break
+        case 'updateTracking':
+          updated = await prisma.order.update({ where: { id: orderId }, data: { trackingNumber: data?.trackingNumber || null } })
+          break
+        default:
+          return res.status(400).json({ message: 'Unknown action' })
+      }
+
+      res.status(200).json({ message: 'Order updated', order: updated })
     } catch (error) {
       console.error('Update order error:', error)
       res.status(500).json({ message: 'Internal server error' })

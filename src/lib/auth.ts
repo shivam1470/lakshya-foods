@@ -5,13 +5,20 @@ import CredentialsProvider from 'next-auth/providers/credentials'
 import bcrypt from 'bcryptjs'
 import { prisma } from './prisma'
 
-export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
-  providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID || '',
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
-    }),
+// Helper to build providers conditionally so missing Google creds don't cause runtime issues
+function buildProviders() {
+  const providers: any[] = []
+
+  if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+    providers.push(
+      GoogleProvider({
+        clientId: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      })
+    )
+  }
+
+  providers.push(
     CredentialsProvider({
       name: 'credentials',
       credentials: {
@@ -24,23 +31,13 @@ export const authOptions: NextAuthOptions = {
         }
 
         const user = await prisma.user.findUnique({
-          where: {
-            email: credentials.email
-          }
+          where: { email: credentials.email }
         })
 
-        if (!user || !user.password) {
-          return null
-        }
+        if (!user || !user.password) return null
 
-        const isPasswordValid = await bcrypt.compare(
-          credentials.password,
-          user.password
-        )
-
-        if (!isPasswordValid) {
-          return null
-        }
+        const isPasswordValid = await bcrypt.compare(credentials.password, user.password)
+        if (!isPasswordValid) return null
 
         return {
           id: user.id,
@@ -51,15 +48,23 @@ export const authOptions: NextAuthOptions = {
         }
       }
     })
-  ],
-  session: {
-    strategy: 'jwt',
-  },
+  )
+
+  return providers
+}
+
+if (!process.env.NEXTAUTH_SECRET) {
+  // eslint-disable-next-line no-console
+  console.warn('[Auth] NEXTAUTH_SECRET is not set. Define it in production to avoid security risks.')
+}
+
+export const authOptions: NextAuthOptions = {
+  adapter: PrismaAdapter(prisma),
+  providers: buildProviders(),
+  session: { strategy: 'jwt' },
   callbacks: {
     async jwt({ token, user }) {
-      if (user) {
-        token.role = (user as any).role
-      }
+      if (user) token.role = (user as any).role
       return token
     },
     async session({ session, token }) {
@@ -70,7 +75,12 @@ export const authOptions: NextAuthOptions = {
       return session
     },
   },
-  pages: {
-    signIn: '/auth/signin',
-  },
+  pages: { signIn: '/auth/signin' },
+  debug: process.env.NODE_ENV !== 'production',
+  events: {
+    async signIn(message) {
+      // eslint-disable-next-line no-console
+      console.log('[NextAuth SignIn]', { userId: (message as any)?.user?.id })
+    }
+  }
 }

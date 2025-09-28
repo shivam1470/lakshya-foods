@@ -48,9 +48,10 @@ pnpm install
 cp .env.example .env.local
 # Edit .env.local with your configuration
 
-# Set up database
+# Set up database (initial - PostgreSQL recommended)
 npx prisma generate
-npx prisma db push
+# After setting a real Postgres DATABASE_URL run:
+# npx prisma migrate dev --name init
 
 # Start development server
 pnpm dev
@@ -61,8 +62,10 @@ Visit: http://localhost:3000
 ### Environment Variables
 Create a `.env.local` file with:
 ```env
-# Database
-DATABASE_URL="file:./dev.db"
+# Database (use Neon / Supabase / Railway Postgres in production)
+# Example Neon connection string:
+# postgresql://USER:PASSWORD@ep-your-neon-host.ap-southeast-1.aws.neon.tech/neondb?sslmode=require
+DATABASE_URL="postgresql://USER:PASSWORD@HOST/dbname?sslmode=require"
 
 # NextAuth
 NEXTAUTH_URL="http://localhost:3000"
@@ -145,7 +148,7 @@ npm run deploy
      - Output Directory: `.next`
    - Click "Deploy"
 
-3. **Environment Variables (Optional)**
+3. **Environment Variables (Required)**
    - In Vercel dashboard → Project Settings → Environment Variables
    - Add any variables from `.env.example`
    - Redeploy if needed
@@ -169,7 +172,47 @@ Copy `.env.example` to `.env.local` and configure:
 cp .env.example .env.local
 ```
 
-Update variables as needed for your deployment.
+Update variables as needed for your deployment. For production ensure:
+
+| Variable | Required | Notes |
+|----------|----------|-------|
+| DATABASE_URL | Yes | Postgres connection string (Neon recommended) |
+| NEXTAUTH_SECRET | Yes | Strong random value (openssl rand -base64 32) |
+| NEXTAUTH_URL | Yes | Your deployed HTTPS URL |
+| GOOGLE_CLIENT_ID | Optional | If enabling Google OAuth |
+| GOOGLE_CLIENT_SECRET | Optional | Paired with client id |
+| SEED_ADMIN_EMAIL | Optional | Only if using seed script |
+| SEED_ADMIN_PASSWORD | Optional | Only if using seed script |
+| SEED_ADMIN_NAME | Optional | Only if using seed script |
+
+### Health & Diagnostics
+
+The application exposes a lightweight health endpoint:
+
+`/api/health` → Returns `{ status: 'ok', ... }` if the runtime is alive.
+
+Troubleshooting 500 errors:
+1. Check Vercel function logs (Dashboard → Deployments → Functions)
+2. Hit `/api/health` (should return 200)
+3. Verify env vars are set correctly (especially `DATABASE_URL` & `NEXTAUTH_SECRET`)
+4. Run `npx prisma migrate deploy` locally to confirm migrations apply cleanly
+5. Redeploy after fixing variables.
+
+### Migration Workflow
+
+Local development (first time after switching to Postgres):
+```bash
+export DATABASE_URL=postgresql://USER:PASSWORD@HOST/dbname?sslmode=require
+npx prisma migrate dev --name init
+```
+
+Production (Vercel) build integrates migration with: `prisma migrate deploy` (will be added to build script once migrations are committed).
+
+### Seeding (Optional)
+You can add a seed script to create an initial admin user. Provide `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD`, and run:
+```bash
+npx ts-node prisma/seed.ts
+```
 
 ## Tech Notes
 - Tailwind + MUI: Tailwind handles layout/spacing; MUI handles form elements and accessible components

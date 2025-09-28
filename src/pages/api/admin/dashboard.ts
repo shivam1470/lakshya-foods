@@ -10,15 +10,14 @@ async function handler(req: AdminRequest, res: NextApiResponse) {
         totalUsers,
         totalInquiries,
         newInquiries,
-        totalOrders
+        totalOrders,
+        revenueAgg
       ] = await Promise.all([
         prisma.user.count(),
         prisma.inquiry.count(),
-        prisma.inquiry.count({
-          where: { status: 'new' }
-        }),
-        // For now, we'll use a static value for orders since the model might not be ready
-        Promise.resolve(0)
+        prisma.inquiry.count({ where: { status: 'new' } }),
+        prisma.order.count(),
+        prisma.order.aggregate({ _sum: { totalAmount: true } })
       ])
 
       // Get recent activity
@@ -43,6 +42,21 @@ async function handler(req: AdminRequest, res: NextApiResponse) {
           email: true,
           status: true,
           createdAt: true
+        }
+      })
+
+      const recentOrders = await prisma.order.findMany({
+        take: 5,
+        orderBy: { createdAt: 'desc' },
+        select: {
+          id: true,
+          orderNumber: true,
+          status: true,
+          totalAmount: true,
+          currency: true,
+          paymentStatus: true,
+          createdAt: true,
+          user: { select: { id: true, name: true, email: true } }
         }
       })
 
@@ -72,12 +86,14 @@ async function handler(req: AdminRequest, res: NextApiResponse) {
           totalInquiries,
           newInquiries,
           totalOrders,
+          totalRevenue: revenueAgg._sum.totalAmount || 0,
           newUsersThisMonth,
           newInquiriesThisMonth
         },
         recentActivity: {
           users: recentUsers,
-          inquiries: recentInquiries
+          inquiries: recentInquiries,
+          orders: recentOrders
         }
       })
     } catch (error) {
