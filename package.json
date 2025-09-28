@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "next dev",
-  "build": "bash scripts/with-migrate.sh next build",
+  "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "deploy": "./deploy.sh",
