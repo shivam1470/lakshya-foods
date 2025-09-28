@@ -1,4 +1,4 @@
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   try {
     // Minimal runtime introspection
     const envSummary = Object.keys(process.env || {}).filter(k => k.startsWith('NEXT_') || k === 'NODE_ENV');
