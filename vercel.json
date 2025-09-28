@@ -1,4 +1,6 @@
 {
   "version": 2,
-  "regions": ["bom1"]
+  "git": {
+    "productionBranch": "main"
+  }
 }
