@@ -1,4 +1,6 @@
 /** @type {import('next').NextConfig} */
+console.log('[next.config] Loaded Next.js config');
+
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,

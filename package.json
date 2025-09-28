@@ -5,12 +5,11 @@
   "license": "MIT",
   "scripts": {
     "dev": "next dev",
-  "build": "next build",
+    "build": "echo '[build] starting prisma generate' && prisma generate && echo '[build] prisma generate done' && next build",
     "start": "next start",
     "lint": "next lint",
     "deploy": "./deploy.sh",
     "quick-deploy": "./quick-deploy.sh",
-    "postinstall": "prisma generate",
     "seed": "ts-node --transpile-only prisma/seed.ts",
     "check-env": "node scripts/check-env.cjs",
     "check-db": "node scripts/check-db.cjs"
