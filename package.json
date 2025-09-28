@@ -11,9 +11,9 @@
     "deploy": "./deploy.sh",
     "quick-deploy": "./quick-deploy.sh",
     "postinstall": "prisma generate",
-    "seed": "ts-node --transpile-only prisma/seed.ts"
-  ,"check-env": "node scripts/check-env.cjs"
-  ,"check-db": "node scripts/check-db.cjs"
+    "seed": "ts-node --transpile-only prisma/seed.ts",
+    "check-env": "node scripts/check-env.cjs",
+    "check-db": "node scripts/check-db.cjs"
   },
   "dependencies": {
     "@emotion/cache": "^11.11.0",
